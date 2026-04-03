@@ -1,0 +1,4 @@
+hiba details.txt
+.env
+__pycache__/
+*.pyc
