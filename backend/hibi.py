@@ -3,7 +3,7 @@ import re
 from flask import Flask, request, jsonify, render_template, session
 from google import genai
 
-app = Flask(__name__, template_folder="../templates")
+app = Flask(__name__, template_folder="../frontend")
 app.secret_key = os.environ.get("SECRET_KEY", "hibi-secret-key")
 
 def md_to_html(text):
