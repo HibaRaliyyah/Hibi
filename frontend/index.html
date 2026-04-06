@@ -30,7 +30,7 @@
   --gap-md: 16px;
   --gap-lg: 24px;
 
-  /* Topbar height per breakpoint — overridden in media queries */
+  /* Topbar height per breakpoint */
   --topbar-h: 60px;
 }
 
@@ -63,7 +63,6 @@ body {
   flex-shrink: 0;
   background: var(--bg);
   z-index: 10;
-  /* safe area for notched phones */
   padding-left: max(var(--gap-md), env(safe-area-inset-left));
   padding-right: max(var(--gap-md), env(safe-area-inset-right));
 }
@@ -110,7 +109,6 @@ body {
   padding: var(--gap-md) 0 var(--gap-sm);
 }
 
-/* Center column on wider screens */
 .messages-inner {
   width: 100%;
   max-width: 768px;
@@ -119,6 +117,18 @@ body {
   flex-direction: column;
   gap: 2px;
   flex: 1;
+}
+
+/* ── Message Row ── */
+.msg-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gap-sm);
+  padding: 5px var(--gap-md);
+}
+
+.msg-row.user {
+  flex-direction: row-reverse;
 }
 
 /* ── Welcome screen ── */
@@ -247,7 +257,6 @@ body {
   background: var(--bg);
   border-top: 1px solid var(--border);
   padding: 10px var(--gap-md);
-  /* safe-area for iPhone home bar */
   padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   padding-left: max(var(--gap-md), env(safe-area-inset-left));
   padding-right: max(var(--gap-md), env(safe-area-inset-right));
@@ -269,7 +278,6 @@ body {
   padding: 10px 14px;
   color: var(--text-primary);
   font-family: inherit;
-  font-size: 15px;
   resize: none;
   outline: none;
   caret-color: var(--accent);
@@ -278,7 +286,6 @@ body {
   overflow-y: auto;
   -webkit-appearance: none;
   transition: border-color 0.18s;
-  /* prevent iOS zoom on focus (font < 16px triggers zoom) */
   font-size: max(16px, 1rem);
 }
 
@@ -318,76 +325,38 @@ body {
    BREAKPOINTS
    ════════════════════════════════ */
 
-/* ── Tablet (≥ 600px) ── */
 @media (min-width: 600px) {
   :root { --topbar-h: 68px; }
-
-  .topbar {
-    padding: 12px var(--gap-lg);
-    gap: 10px;
-  }
-
+  .topbar { padding: 12px var(--gap-lg); gap: 10px; }
   .topbar-logo { width: 56px; height: 48px; }
   .topbar-title { font-size: 24px; }
   .topbar-badge { font-size: 11px; }
-
   .messages-area { padding: 20px 0 12px; }
-
   .msg-row { padding: 7px var(--gap-lg); }
-
   .avatar { width: 30px; height: 30px; }
-
   .welcome-icon { width: 60px; height: 60px; font-size: 24px; }
-
-  .input-area {
-    padding: 12px var(--gap-lg);
-    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-  }
-
-  .input-wrap textarea {
-    padding: 11px 16px;
-    font-size: 15px;
-  }
+  .input-area { padding: 12px var(--gap-lg); padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+  .input-wrap textarea { padding: 11px 16px; font-size: 15px; }
 }
 
-/* ── Desktop (≥ 900px) ── */
 @media (min-width: 900px) {
   :root { --topbar-h: 74px; }
-
-  .topbar {
-    padding: 14px 28px;
-    gap: 12px;
-  }
-
+  .topbar { padding: 14px 28px; gap: 12px; }
   .topbar-logo { width: 72px; height: 62px; }
   .topbar-title { font-size: 28px; }
   .topbar-badge { font-size: 12px; padding: 2px 9px; }
-
   .messages-area { padding: 24px 0 14px; }
   .msg-row { padding: 8px 24px; }
-
   .avatar { width: 32px; height: 32px; font-size: 13px; }
   .avatar.ai-av { font-size: 15px; }
-
   .welcome-icon { width: 64px; height: 64px; font-size: 26px; margin-bottom: 20px; }
   .welcome-sub { max-width: 400px; }
-
-  .input-area {
-    padding: 14px 28px;
-    padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px));
-  }
-
-  .input-wrap textarea {
-    padding: 13px 18px;
-    font-size: 15px;
-    max-height: 120px;
-  }
-
+  .input-area { padding: 14px 28px; padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px)); }
+  .input-wrap textarea { padding: 13px 18px; font-size: 15px; max-height: 120px; }
   .send-btn { width: 42px; height: 42px; min-width: 42px; }
   .send-btn svg { width: 18px; height: 18px; }
 }
 
-/* ── Large Desktop (≥ 1280px) ── */
 @media (min-width: 1280px) {
   .topbar { padding: 16px 32px; }
   .topbar-logo { width: 80px; height: 70px; }
@@ -395,7 +364,6 @@ body {
   .input-area { padding: 16px 32px; padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
 }
 
-/* ── Landscape mobile (short viewport) ── */
 @media (max-height: 500px) and (orientation: landscape) {
   :root { --topbar-h: 52px; }
   .topbar { padding: 8px var(--gap-md); }
@@ -450,6 +418,16 @@ body {
 </div>
 
 <script>
+  /* ── DOM refs ── */
+  const messagesArea  = document.getElementById('messagesArea');
+  const messagesInner = document.getElementById('messagesInner');
+  const userInput     = document.getElementById('userInput');
+  const sendBtn       = document.getElementById('sendBtn');
+
+  /* ── State ── */
+  let welcomeScreen = document.getElementById('welcomeScreen');
+  let history       = [];
+  let isThinking    = false;
 
   /* ── Append message ── */
   function appendMessage(role, content) {
