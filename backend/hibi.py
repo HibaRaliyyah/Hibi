@@ -1,63 +1,31 @@
 import os
-import re
 from flask import Flask, request, jsonify, render_template
 from google import genai
+import markdown
+import bleach
 
 app = Flask(__name__, template_folder="../frontend")
 app.secret_key = os.environ.get("SECRET_KEY", "hibi-secret-key")
 
 
+# Markdown → Safe HTML
 def md_to_html(text):
-    lines = text.split('\n')
-    html_lines = []
-    in_ul = False
-    in_ol = False
+    html = markdown.markdown(
+        text,
+        extensions=[
+            "extra",        # tables, lists
+            "nl2br",        # line breaks
+            "sane_lists"    # better lists
+        ]
+    )
 
-    for line in lines:
-        # Bold
-        line = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', line)
+    # Allow only safe tags
+    allowed_tags = [
+        "p", "strong", "em", "ul", "ol", "li",
+        "br", "a", "h1", "h2", "h3", "h4"
+    ]
 
-        ol_match     = re.match(r'^\d+\.\s+(.*)', line)
-        nested_match = re.match(r'^\s{2,}[\*\-]\s+(.*)', line)
-        ul_match     = re.match(r'^[\*\-]\s+(.*)', line)
-
-        if ol_match:
-            if in_ul:
-                html_lines.append('</ul>')
-                in_ul = False
-            if not in_ol:
-                html_lines.append('<ol>')
-                in_ol = True
-            html_lines.append(f'<li>{ol_match.group(1)}</li>')
-
-        elif nested_match:
-            html_lines.append(f'<li class="nested">{nested_match.group(1)}</li>')
-
-        elif ul_match:
-            if in_ol:
-                html_lines.append('</ol>')
-                in_ol = False
-            if not in_ul:
-                html_lines.append('<ul>')
-                in_ul = True
-            html_lines.append(f'<li>{ul_match.group(1)}</li>')
-
-        else:
-            if in_ol:
-                html_lines.append('</ol>')
-                in_ol = False
-            if in_ul:
-                html_lines.append('</ul>')
-                in_ul = False
-            if line.strip():
-                html_lines.append(f'<p>{line}</p>')
-
-    if in_ol:
-        html_lines.append('</ol>')
-    if in_ul:
-        html_lines.append('</ul>')
-
-    return '\n'.join(html_lines)
+    return bleach.clean(html, tags=allowed_tags, strip=True)
 
 
 def get_kb():
@@ -68,10 +36,15 @@ def get_system_prompt():
     kb = get_kb()
     return f"""
 You are Hiba's personal assistant. Your job is to provide answers to questions asked by the user.
+
 Give important information in **bold**.
-Answer in a polite and friendly tone.
+Use proper bullet points and lists where needed.
+Keep answers clean and readable.
+
 If there are any questions outside the knowledge base, say you do not have that information.
+
 Only refer to the knowledge base below and provide responses based on it.
+
 {kb}
 """
 
@@ -94,18 +67,23 @@ def chat():
 
     try:
         client = get_gemini_client()
+
         chat_session = client.chats.create(
             model="gemini-2.5-flash",
             config={"system_instruction": get_system_prompt()}
         )
 
+        # Maintain history
         for msg in history[:-1]:
             if msg["role"] == "user":
                 chat_session.send_message(msg["content"])
 
         response = chat_session.send_message(user_message)
-        reply = md_to_html(response.text)
-        return jsonify({"reply": reply, "status": "ok"})
+
+        # Convert Markdown → HTML
+        reply_html = md_to_html(response.text)
+
+        return jsonify({"reply": reply_html, "status": "ok"})
 
     except Exception as e:
         return jsonify({"reply": f"Error: {str(e)}", "status": "error"})
