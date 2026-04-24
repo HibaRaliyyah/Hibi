@@ -3,19 +3,20 @@
 ## Project Overview
 Hibi AI Personal Assistant is a versatile tool designed to assist users in daily tasks through intelligent and conversational interactions. Utilizing advanced AI capabilities, Hibi aims to enhance productivity and simplify everyday decisions.
 
+<img width="1358" height="610" alt="hibiweb" src="https://github.com/user-attachments/assets/2885326b-4736-4100-9c90-6f9c6038805a" />
+
+## Link
+https://hibi-personalassistant.vercel.app/
+
 ## Features
 - **Natural Language Processing**: Understand and respond to user queries in real-time.
-- **Task Management**: Create, track, and manage tasks effortlessly.
-- **Integration with APIs**: Connect with various services for seamless data retrieval and task execution.
-- **Smart Reminders**: Set reminders that adapt to your schedule and preferences.
-- **User Personalization**: Tailors responses and suggestions based on user behavior and preferences.
+- **User Personalization**: Tailors responses and suggestions based on user behavior and preferences about me.
 
 ## Tech Stack
 - **Programming Language**: Python
 - **Framework**: FastAPI for building APIs
-- **Database**: PostgreSQL for data storage
-- **Deployment**: Docker for containerization
-- **Cloud Service**: AWS for hosting and scalability
+- **AI**: Gemini API
+- **Deployment**: vercel for hosting and scalability
 
 ## Setup Instructions
 1. **Clone the repository**
@@ -38,15 +39,3 @@ Hibi AI Personal Assistant is a versatile tool designed to assist users in daily
    ```bash
    uvicorn main:app --reload
    ```
-
-## API Endpoints
-- **GET /api/tasks**: Retrieves all tasks.
-- **POST /api/tasks**: Creates a new task.
-- **PUT /api/tasks/{id}**: Updates a task by its ID.
-- **DELETE /api/tasks/{id}**: Deletes a task by its ID.
-
-## Contributing
-If you'd like to contribute to this project, please open an issue or submit a pull request. All contributions are welcome!
-
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
